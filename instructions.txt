@@ -1,0 +1,39 @@
+----First collect txt files from clinvar with keywords----
+
+1) Download txt files from 'https://www.ncbi.nlm.nih.gov/clinvar' with required keywords.
+    Save file in format "clinvar_result_xxx.txt".
+    Check that 'path' is to the correct location for the txt files.
+    Check that 'folder_path' is to the correct new location to save the csv files and combined csv.
+    Add file name to txt file list.
+2) Run Running_script.py
+    Running_script.py will call ClinVar_txt_to_csv.py to convert txt files to csv and combine them to one csv with search term as a column.
+    Combined file generated is called ClinVar_combined.csv
+
+----Next step is to search dbSNP for gene information----
+
+3) Run 'formatting_for_dbSNP.py'
+    Program calls 'ClinVar_combined.csv' and groups by genes then sorts by snp.
+    This file is saved as 'reorganized_genes.csv'.
+4) Run 'webscraping_for_pmid.py' (takes around 6 hours for 130k snps. May need to delete publication_cache.csv?)
+    Collects data for each snp in 'reorganized_genes.csv' from 'https://www.ncbi.nlm.nih.gov/snp/{snp_id}#publications'.
+    Parses webpage to collect publication information.
+    Creates cache 'publication_cache.csv' to store collected information for each snp: 'dbsnp_id', 'PMID', 'Title', 'Author', 'Year', 'Journal', 'Link'.
+    Saves file as 'final_reorganized_genes.csv'
+    Also creates file called 'snp_fetch.log' to monitor progress in real time.
+    Program can run while computer is sleeping.
+5) Run 'unavailable_pmid_info_search.py'
+    This file goes through 'final_reorganized_genes.csv' to try and find missing information for snps with 'Unavailable due to server error' in pmid/year/author/title.
+    Saves the file as "final_reorganized_genes_updated.csv"
+
+----Next, collect GWAS p-values from NCBI----
+
+6) Run 'single_genes_file_generator.py'
+    Can run concurrently with 4) and 5).
+    This program scans reorganized_genes.csv for unique gene names and saves them in file called 'unique_gene_names.csv'.
+7) Run 'gwas_pvalues.py'
+    This program searches through NCBI 'https://www.ebi.ac.uk/gwas/rest/api/singleNucleotidePolymorphisms/search/findByGene'.
+    It collects snp information with publications and reports p-values.
+
+
+
+
